@@ -66,16 +66,12 @@ AB_OTA_POSTINSTALL_CONFIG += \
 # ===================================================================
 
 PRODUCT_PACKAGES += \
-    # Boot Control HAL (for managing A/B slots)
     android.hardware.boot@1.2-mtkimpl \
     android.hardware.boot@1.2-mtkimpl.recovery \
-    # Fastbootd (userspace fastboot implementation)
     android.hardware.fastboot@1.0-impl-mock \
     fastbootd \
-    # Health HAL (for battery and charging status)
     android.hardware.health@2.1-impl \
     android.hardware.health@2.1-service \
-    # A/B OTA and Update Engine components
     cppreopts.sh \
     otapreopt_script \
     update_engine \
