@@ -20,7 +20,7 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
 
 # Install GSI keys to allow booting developer GSI with verified boot
-[cite_start]$(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk) [cite: 6]
+$(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk)
 
 # Inherit Virtual A/B OTA configuration
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
