@@ -5,70 +5,84 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# Inherit from those products. Most specific first.
+# ===================================================================
+# Inherit from Base Product Configurations
+# ===================================================================
+# Most specific configurations should be listed first.
+
+# Inherit the core AOSP product configuration
 $(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
+
+# Inherit 64-bit primary architecture settings
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 
-# Installs gsi keys into ramdisk, to boot a developer GSI with verified boot.
-$(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk)
-
-# Enable project quotas and casefolding for emulated storage without sdcardfs
+# Inherit support for emulated storage
 $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
 
-# Virtual A/B
+# Install GSI keys to allow booting developer GSI with verified boot
+[cite_start]$(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk) [cite: 6]
+
+# Inherit Virtual A/B OTA configuration
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
 
-LOCAL_PATH := device/infinix/X670
+# ===================================================================
+# Product Information
+# ===================================================================
 
-# VNDK
+# Set the shipping API level and target VNDK version for the product
+PRODUCT_SHIPPING_API_LEVEL := 31
 PRODUCT_TARGET_VNDK_VERSION := 31
 
-# API
-PRODUCT_SHIPPING_API_LEVEL := 31
+# ===================================================================
+# Virtual A/B & Dynamic Partitions
+# ===================================================================
 
-# A/B
-AB_OTA_UPDATER := true
+# Enable Virtual A/B and dynamic partitions
 ENABLE_VIRTUAL_AB := true
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
+
+# Configure the A/B OTA updater
+AB_OTA_UPDATER := true
+
+# Define the list of partitions that are updated via A/B OTAs
 AB_OTA_PARTITIONS += \
-    system \
+    boot \
     product \
+    system \
     system_ext \
-    vendor \
     vbmeta_system \
     vbmeta_vendor \
-    boot
+    vendor
 
+# Configure post-install actions for the system partition during an OTA
 AB_OTA_POSTINSTALL_CONFIG += \
     RUN_POSTINSTALL_system=true \
     POSTINSTALL_PATH_system=system/bin/otapreopt_script \
     FILESYSTEM_TYPE_system=erofs \
     POSTINSTALL_OPTIONAL_system=true
 
-# Boot Control HAL
+# ===================================================================
+# Product Packages
+# ===================================================================
+
 PRODUCT_PACKAGES += \
+    # Boot Control HAL (for managing A/B slots)
+    android.hardware.boot@1.2-mtkimpl \
     android.hardware.boot@1.2-mtkimpl.recovery \
-    android.hardware.boot@1.2-mtkimpl
-
-PRODUCT_PACKAGES_DEBUG += \
-    bootctrl
-
-# Health HAL
-PRODUCT_PACKAGES += \
-    android.hardware.health@2.1-impl \
-    android.hardware.health@2.1-service
-
-# Fastbootd
-PRODUCT_PACKAGES += \
+    # Fastbootd (userspace fastboot implementation)
     android.hardware.fastboot@1.0-impl-mock \
-    fastbootd
-
-PRODUCT_PACKAGES_DEBUG += \
-    update_engine_client
-
-PRODUCT_PACKAGES += \
-    otapreopt_script \
+    fastbootd \
+    # Health HAL (for battery and charging status)
+    android.hardware.health@2.1-impl \
+    android.hardware.health@2.1-service \
+    # A/B OTA and Update Engine components
     cppreopts.sh \
+    otapreopt_script \
     update_engine \
-    update_verifier \
-    update_engine_sideload
+    update_engine_sideload \
+    update_verifier
+
+# Packages to include only in debug builds
+PRODUCT_PACKAGES_DEBUG += \
+    bootctrl \
+    update_engine_client

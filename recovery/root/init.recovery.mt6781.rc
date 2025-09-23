@@ -1,11 +1,81 @@
+# ===================================================================
+# Imports
+# ===================================================================
+# Import additional init script configurations.
+
 import /mtk-plpath-utils.rc
+import /tee.rc
+import /trustonic.rc
 
+# ===================================================================
+# Core Boot Triggers
+# ===================================================================
+# These triggers run at specific stages of the boot process.
+
+# Runs early in the initialization process.
 on init
-    export LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw:/system/lib64/hw 
+    # Set the library path for dynamically linked executables.
+    export LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw:/system/lib64/hw
 
+# Runs after filesystems are mounted.
 on fs
+    # Install keys from the device tree into the session keyring.
     install_keyring
 
+# Runs after the main boot sequence is complete.
 on boot
+    # Start the boot control and health HALs.
     start boot-hal-1-2
     start health-hal-2-1
+
+# ===================================================================
+# Property Triggers
+# ===================================================================
+# These triggers run when a specific system property changes.
+
+# Start cryptographic services when the hardware service manager is ready.
+on property:hwservicemanager.ready=true
+    start mobicore
+    start keymaster-4-1
+    start gatekeeper-1-0
+
+# Stop crypto services if the device state is unsupported (e.g., error).
+on property:ro.crypto.state=unsupported
+    stop mobicore
+    stop keymaster-4-1
+    stop gatekeeper-1-0
+
+# Stop crypto services if the device is unencrypted.
+on property:ro.crypto.state=unencrypted
+    stop mobicore
+    stop keymaster-4-1
+    stop gatekeeper-1-0
+
+# Stop crypto services once TWRP has finished decryption.
+on property:twrp.decrypt.done=true
+    stop mobicore
+    stop keymaster-4-1
+    stop gatekeeper-1-0
+
+# ===================================================================
+# Service Definitions
+# ===================================================================
+# These are the definitions for HAL services required for decryption.
+
+# Gatekeeper HAL service for lockscreen authentication.
+service gatekeeper-1-0 /vendor/bin/hw/android.hardware.gatekeeper@1.0-service
+    interface android.hardware.gatekeeper@1.0::IGatekeeper default
+    class hal
+    user root
+    group root
+    disabled
+    seclabel u:r:recovery:s0
+
+# Keymaster HAL service for managing cryptographic keys via Trustonic TEE.
+service keymaster-4-1 /vendor/bin/hw/android.hardware.keymaster@4.1-service.trustonic
+    interface android.hardware.keymaster@4.1::IKeymasterDevice default
+    class hal
+    user root
+    group root drmrpc
+    disabled
+    seclabel u:r:recovery:s0
