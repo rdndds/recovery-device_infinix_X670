@@ -1,33 +1,7 @@
-# ===================================================================
-# File-Based Encryption (FBE)
-# ===================================================================
-# These properties configure the device's encryption settings.
-
-# Use AES-256-CTS mode for encrypting file contents and filenames.
 ro.crypto.volume.filenames_mode=aes-256-cts
-
-# Enable support for metadata encryption, which is required for FBE.
 ro.crypto.metadata.enabled=true
 ro.crypto.support_metadata_encrypt=true
-
-# ===================================================================
-# Trusted Execution Environment (TEE)
-# ===================================================================
-# These properties specify which TEE implementations are supported.
-
-# Enable support for the GlobalPlatform (GP) TEE standard.
 ro.vendor.mtk_tee_gp_support=1
-
-# Enable support for the Trustonic TEE implementation.
 ro.vendor.mtk_trustonic_tee_support=1
-
-# ===================================================================
-# Gatekeeper & Keymaster
-# ===================================================================
-# These properties link security services to a hardware-backed TEE.
-
-# Set the Trustonic TEE as the backend for Gatekeeper (verifies lockscreen password/PIN).
 ro.hardware.gatekeeper=trustonic
-
-# Set the Trustonic TEE as the backend for Keymaster (manages cryptographic keys).
 ro.hardware.kmsetkey=trustonic
